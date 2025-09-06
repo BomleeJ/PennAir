@@ -11,7 +11,7 @@ def analyze_image(result_name: str, image_path: str = "files/Grassy.png"):
     processedImage = add_contours_to_frame(img, False)
     cv.imwrite(result_path, processedImage)
 
-def analyze_video(result_name: str, video_path: str):
+def analyze_video(result_name: str, video_path: str, with_depth=False):
     result_path = f"results/{result_name}.avi"
     cap = cv.VideoCapture(video_path)
 
@@ -29,7 +29,7 @@ def analyze_video(result_name: str, video_path: str):
             break
         logging.info(f"Processing Frame {val} from video {video_path}")
         val += 1
-        processed_frame = add_contours_to_frame(frame)
+        processed_frame = add_contours_to_frame(frame, with_depth=with_depth)
         out.write(processed_frame)
 
     cap.release()
@@ -38,16 +38,20 @@ def analyze_video(result_name: str, video_path: str):
 def main():
     Phase2_video_path = "files/Phase2.mp4"
     Phase3_video_path = "files/Phase3.mp4"
+    Phase4_video_path = "files/Phase3.mp4"
     
     analyze_image("Grassy_with_contours")
     logging.info("Image Complete!")
-    """
-    analyze_video("Phase2_with_contours2.avi", Phase2_video_path)
+    
+    analyze_video_2d("Phase2_with_contours2.avi", Phase2_video_path)
     logging.info("Video1 Complete!")
     
-    analyze_video("Phase3_with_contours2.avi", Phase3_video_path)
+    analyze_video_2d("Phase3_with_contours2.avi", Phase3_video_path)
     logging.info("Video2 Complete!")
-    """
+    
+    
+    analyze_video("Phase4_with_contours2.avi", Phase4_video_path, with_depth=True)
+    logging.info("Video3 Complete!")
     
 
 if __name__ == "__main__":
