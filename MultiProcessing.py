@@ -8,6 +8,7 @@ def main():
         executor.submit(analyze_video, "Phase2_with_contours2.avi", "files/Phase2.mp4")
         executor.submit(analyze_video, "Phase3_with_contours2.avi", "files/Phase3.mp4")
         executor.submit(analyze_video, "Phase4_with_contours2.avi", "files/Phase3.mp4", with_depth=True)
+        
 
 if __name__ == "__main__":
     main()

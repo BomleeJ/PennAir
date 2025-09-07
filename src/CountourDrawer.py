@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import cv2 as cv
 import numpy as np
 
-def add_contours_to_frame(frame: Image, Video=True, with_depth=False):
+
+def add_contours_to_frame(frame: Image, Video=True, with_depth=False) -> Image:
     """
     Apply's Contours around Shapes to a given Frame
     """
@@ -25,9 +26,10 @@ def add_contours_to_frame(frame: Image, Video=True, with_depth=False):
         draw_centroids(centroids_2d, frame)
 
     ImageWithContours = cv.drawContours(frame, contours, -1, (255, 255, 0), 3)
-    
+
     images = [grayscale, adaptiveThresholdImage, SansNoise, ImageWithContours]
     return ImageWithContours
+
 
 def apply_adaptive_thresholding(frame: Image) -> Image:
     """
@@ -44,6 +46,7 @@ def apply_adaptive_thresholding(frame: Image) -> Image:
     )
 
     return adaptive_gaussian
+
 
 def eliminate_noise(frame: Image, video: bool):
     """
@@ -67,18 +70,21 @@ def eliminate_noise(frame: Image, video: bool):
     thresh = cv.dilate(thresh, Dilatekernel, iterations=5)
     return thresh
 
+
 def get_3d_coordinates(cx, cy, radius_pixels):
     """
     Calculates the 3D Coordinates of the Centroid
     """
-    # This value was calculated manually in Preview, the Circle was ~192 pixels in diameter 
+    # This value was calculated manually in Preview, the Circle was ~192 pixels in diameter
     # given a 20 inch diameter, 192 pixels is 9.6 pixels per inch
     PIXELS_PER_INCH = 9.6
-    intrinsic_matrix = np.array([[2564.3186869,0,0],[0,2569.70273111,0],[0, 0, 1]])
-    fx = intrinsic_matrix[0,0]
-    fy = intrinsic_matrix[1,1]
-    image_center_x = intrinsic_matrix[0,2]
-    image_center_y = intrinsic_matrix[1,2]
+    intrinsic_matrix = np.array(
+        [[2564.3186869, 0, 0], [0, 2569.70273111, 0], [0, 0, 1]]
+    )
+    fx = intrinsic_matrix[0, 0]
+    fy = intrinsic_matrix[1, 1]
+    image_center_x = intrinsic_matrix[0, 2]
+    image_center_y = intrinsic_matrix[1, 2]
 
     radius_inches = radius_pixels / PIXELS_PER_INCH
     Zc = radius_inches * fx / radius_pixels
@@ -86,6 +92,7 @@ def get_3d_coordinates(cx, cy, radius_pixels):
     Yc = (cy - image_center_y) * Zc / fy
 
     return float(Xc), float(Yc), float(Zc)
+
 
 def calculate_countours(frame: Image, video):
     if video:
@@ -101,7 +108,7 @@ def calculate_countours(frame: Image, video):
     return ret
 
 
-def calculate_centroids(contours):
+def calculate_centroids(contours: List[Contour]) -> List[Tuple[int, int]]:
     centroids = []
     for contour in contours:
         M = cv.moments(contour)
@@ -116,7 +123,7 @@ def calculate_centroids(contours):
     return centroids
 
 
-def draw_centroids(centroids, frame):
+def draw_centroids(centroids: List[Tuple[int, int]], frame: Image):
     WHITE = (255, 255, 255)
     font = cv.FONT_HERSHEY_SIMPLEX
     font_size = 0.5
@@ -136,27 +143,33 @@ def draw_centroids(centroids, frame):
         )
         cv.circle(frame, center, radius, WHITE, -1)
 
-def calculate_centroids_3D_coordinates(contours, frame):
+
+def calculate_centroids_3D_coordinates(
+    contours: List[Contour], frame: Image
+) -> List[Tuple[float, float, float]]:
     """
     Calculates the Centroids Coordinates X, Y, Z
 
     Docs: https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html
     """
-    
+
     centroids_3d = []
 
     for contour in contours:
         (cx, cy), radius_pixels = cv.minEnclosingCircle(contour)
         cx, cy, radius = int(cx), int(cy), int(radius_pixels)
-        
+
         Xc, Yc, Zc = get_3d_coordinates(cx, cy, radius_pixels)
         centroids_3d.append((Xc, Yc, Zc))
 
-    
     return centroids_3d
-    pass
 
-def draw_3d_centroids(centroids_2d, frame, centroids_3d):
+
+def draw_3d_centroids(
+    centroids_2d: List[Tuple[int, int]],
+    frame: Image,
+    centroids_3d: List[Tuple[float, float, float]],
+) -> Image:
     WHITE = (255, 255, 255)
     font = cv.FONT_HERSHEY_SIMPLEX
     font_size = 0.5
